@@ -1,8 +1,15 @@
 # @lanework/protocol
 
-The HTTP contract between the [Lanework](https://lanework.dev) desktop app,
-its checkpoint hook and the Lanework API: request and response types, path
-builders and a few shared constants. It has no runtime dependencies.
+The contract every part of [Lanework](https://lanework.dev) builds on: the
+desktop app, its checkpoint hook, the Lanework API and their MCP servers.
+
+- **HTTP**: request and response types, path builders, shared constants.
+- **Tools** (`src/tools/`): the board tools (`board.ts`, with run-time output
+  shapes in `outputs.ts` for parity checks), lanework-kit's search tools
+  (`kit.ts`) and the conductor/lead control tools (`control.ts`), each with
+  its input JSON Schema.
+
+It has no runtime dependencies.
 
 ```ts
 import { paths, type MachineMeResponse } from "@lanework/protocol";
@@ -15,6 +22,12 @@ const me = (await res.json()) as MachineMeResponse;
 
 The package ships TypeScript source (`src/index.ts`). Use it from a bundler or
 from TypeScript with `"moduleResolution": "bundler"`.
+
+## Releasing
+
+Bump `version` in `package.json`, commit, then push a tag `v<version>`: the
+`publish` workflow checks the tag against `package.json` and publishes to npm.
+Nothing else publishes.
 
 MIT. See [LICENSE](LICENSE). The name and logo are covered by the
 repository's [TRADEMARKS.md](https://github.com/fuongz/lanework/blob/main/TRADEMARKS.md).

@@ -21,6 +21,7 @@ import type { ToolContract } from "./schema";
 
 export * from "./board";
 export * from "./kit";
+export * from "./outputs";
 export * from "./schema";
 
 export type ToolName = BoardToolName | KitToolName;

@@ -6,7 +6,14 @@
 
 /** One tool parameter: its type and the limits a validator enforces. */
 export type ToolParam =
-  | { type: "string"; description?: string; enum?: readonly string[] }
+  | {
+      type: "string";
+      description?: string;
+      enum?: readonly string[];
+      maxLength?: number;
+      /** A regular expression, as JSON Schema spells it. */
+      pattern?: string;
+    }
   | { type: "boolean"; description?: string }
   | {
       type: "integer";
@@ -40,6 +47,8 @@ export interface ToolShape {
 /** One tool as every server and client of it states it. */
 export interface ToolContract<Name extends string = string> extends ToolShape {
   name: Name;
+  /** A short label for people (MCP's `title`); models read `description`. */
+  title?: string;
   /** Sent to the model verbatim. A literal: it sits in a cached prompt prefix. */
   description: string;
   /** True when the tool changes nothing (MCP's `readOnlyHint`). */
@@ -54,11 +63,14 @@ function paramSchema(param: ToolParam): JsonSchema {
     param.description ? { ...schema, description: param.description } : schema;
   switch (param.type) {
     case "string":
-      return described(
-        param.enum
-          ? { type: "string", enum: [...param.enum] }
-          : { type: "string" },
-      );
+      return described({
+        type: "string",
+        ...(param.enum ? { enum: [...param.enum] } : {}),
+        ...(param.maxLength !== undefined
+          ? { maxLength: param.maxLength }
+          : {}),
+        ...(param.pattern !== undefined ? { pattern: param.pattern } : {}),
+      });
     case "boolean":
       return described({ type: "boolean" });
     case "integer":
@@ -103,5 +115,35 @@ export function toolInputSchema(shape: ToolShape): JsonSchema {
     properties,
     ...(shape.required?.length ? { required: [...shape.required] } : {}),
     additionalProperties: false,
+  };
+}
+
+/**
+ * One tool as `tools/list` advertises it (BE-27). Both board servers build
+ * their list with this, so the cloud and the offline one cannot drift on the
+ * fields around the schema either.
+ */
+export function toolListEntry(tool: ToolContract): {
+  name: string;
+  title?: string;
+  description: string;
+  inputSchema: JsonSchema;
+  annotations: {
+    readOnlyHint: boolean;
+    destructiveHint: boolean;
+    openWorldHint: false;
+  };
+} {
+  return {
+    name: tool.name,
+    ...(tool.title ? { title: tool.title } : {}),
+    description: tool.description,
+    inputSchema: toolInputSchema(tool),
+    annotations: {
+      readOnlyHint: tool.readOnly,
+      // Only `delete_review` takes something away, and it archives.
+      destructiveHint: tool.name === "delete_review",
+      openWorldHint: false,
+    },
   };
 }

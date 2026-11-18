@@ -1,14 +1,13 @@
 {
   "name": "@lanework/protocol",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "type": "module",
-  "description": "The HTTP contract between the Lanework desktop app / checkpoint hook and the Lanework API: request and response shapes, types only.",
+  "description": "The contract between the Lanework desktop app, its checkpoint hook, the Lanework API and their MCP servers: HTTP request and response shapes, the board, kit and control tool contracts (types, JSON Schema builders and run-time output shapes).",
   "license": "MIT",
   "author": "fuongz <hi@phuongphung.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fuongz/lanework.git",
-    "directory": "packages/protocol"
+    "url": "git+https://github.com/lanework-dev/contracts.git"
   },
   "exports": {
     ".": "./src/index.ts"
@@ -21,8 +20,15 @@
   "publishConfig": {
     "access": "public"
   },
-  "//": "Types and path builders only, no runtime dependencies. It must never import from apps/ or packages/db: it is the half of the contract the open-source desktop ships, and the private API is the other half.",
+  "//": "Types, JSON Schema builders and output shapes only, no runtime dependencies. The desktop app (open source) and the API and MCP (private) both build on it; neither half may be imported here.",
   "scripts": {
     "typecheck": "tsc --noEmit"
+  },
+  "homepage": "https://github.com/lanework-dev/contracts#readme",
+  "bugs": {
+    "url": "https://github.com/lanework-dev/contracts/issues"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
   }
 }
