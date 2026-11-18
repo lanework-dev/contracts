@@ -29,8 +29,8 @@ from TypeScript with `"moduleResolution": "bundler"`.
 ## Releasing
 
 Bump `version` in `package.json`, commit, then push a tag `v<version>`: the
-`publish` workflow checks the tag against `package.json` and publishes to npm.
-Nothing else publishes.
+`publish` workflow checks the tag against `package.json` and publishes to npm
+through npm Trusted Publishing (OIDC, no token). Nothing else publishes.
 
 MIT. See [LICENSE](LICENSE). The name and logo are covered by the
 repository's [TRADEMARKS.md](https://github.com/fuongz/lanework/blob/main/TRADEMARKS.md).
