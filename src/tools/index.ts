@@ -20,6 +20,7 @@ import {
 import type { ToolContract } from "./schema";
 
 export * from "./board";
+export * from "./instructions";
 export * from "./kit";
 export * from "./outputs";
 export * from "./schema";

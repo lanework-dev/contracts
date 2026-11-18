@@ -8,6 +8,10 @@ desktop app, its checkpoint hook, the Lanework API and their MCP servers.
   shapes in `outputs.ts` for parity checks), lanework-kit's search tools
   (`kit.ts`) and the conductor/lead control tools (`control.ts`), each with
   its input JSON Schema.
+- **Agent rules** (`src/tools/instructions.ts`): `BOARD_INSTRUCTIONS` and
+  `BOARD_WORKER_INSTRUCTIONS`, the text both board MCP servers send on
+  `initialize`; `AGENT_NOTES`, the short pointer a project's AGENTS.md
+  carries instead of the rules.
 
 It has no runtime dependencies.
 

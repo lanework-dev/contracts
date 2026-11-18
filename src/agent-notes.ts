@@ -21,7 +21,29 @@ export const MCP_WORKER_URL = "https://mcp.lanework.dev/v1?toolset=worker";
 /** The MCP host alone, which any lanework config or note contains. */
 export const MCP_HOST = "mcp.lanework.dev";
 
+/**
+ * The board section of a project's AGENTS.md: a pointer, not the rules.
+ *
+ * The rules ship with the tools, as the MCP server's `instructions`
+ * (`BOARD_INSTRUCTIONS`), so every harness gets them on connect and a server
+ * update updates them everywhere. This only names the server and what to do
+ * without it.
+ */
 export const AGENT_NOTES = `## Lanework board
+
+Cards for this repo live on Lanework, through the \`lanework\` MCP server.
+Follow its instructions for finding the board, writing cards and working
+them. If the server is not connected, say so and stop rather than tracking
+the work another way.`;
+
+/**
+ * Board sections the app wrote before, verbatim, newest first. A project
+ * whose AGENTS.md still holds one of them is offered the current
+ * {@link AGENT_NOTES} in its place; anything a person reworded is theirs and
+ * is never replaced.
+ */
+export const AGENT_NOTES_PREVIOUS: readonly string[] = [
+  `## Lanework board
 
 Cards for this repo live on Lanework, through the \`lanework\` MCP server.
 
@@ -43,4 +65,5 @@ Cards for this repo live on Lanework, through the \`lanework\` MCP server.
   by wave, one sub-agent per stream in its own worktree, each given its
   brief as is. Sub-agents write only in \`owns\`, never commit and never
   call Lanework. After each wave, merge, re-run each stream's checks, tick
-  its verify steps and \`checkpoint\` once.`;
+  its verify steps and \`checkpoint\` once.`,
+];
