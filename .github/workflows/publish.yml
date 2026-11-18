@@ -1,4 +1,4 @@
-# Publishes @lanework/protocol when a tag `v<version>` is pushed, and only
+# Publishes @lanework/contracts when a tag `v<version>` is pushed, and only
 # when the tag matches package.json. The only way a version reaches npm: no
 # more tarballs built from a temp folder.
 name: publish

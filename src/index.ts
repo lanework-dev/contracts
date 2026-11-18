@@ -1,4 +1,4 @@
-// @lanework/protocol: the HTTP contract between the Lanework desktop app (and
+// @lanework/contracts: the HTTP contract between the Lanework desktop app (and
 // its checkpoint hook) and the Lanework API (MIT).
 //
 // NOTE: Types, path builders and the tool contract (`./tools`: data plus a

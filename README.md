@@ -1,4 +1,4 @@
-# @lanework/protocol
+# @lanework/contracts
 
 The contract every part of [Lanework](https://lanework.dev) builds on: the
 desktop app, its checkpoint hook, the Lanework API and their MCP servers.
@@ -11,8 +11,11 @@ desktop app, its checkpoint hook, the Lanework API and their MCP servers.
 
 It has no runtime dependencies.
 
+Formerly `@lanework/protocol` (0.1.0, 0.2.0); 0.3.0 is the first release under
+this name.
+
 ```ts
-import { paths, type MachineMeResponse } from "@lanework/protocol";
+import { paths, type MachineMeResponse } from "@lanework/contracts";
 
 const res = await fetch(`https://api.lanework.dev${paths.machinesMe()}`, {
   headers: { authorization: `Bearer ${token}` },
