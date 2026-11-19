@@ -2,6 +2,7 @@
 // only; `/v1/workspaces` is the session twin and refuses a machine with 401.
 // Derived from the server's `routes/sync.ts`.
 
+import type { ProjectAvatar } from "./avatar";
 import type { IsoDate } from "./common";
 
 export interface SyncProfile {
@@ -20,6 +21,12 @@ export interface SyncWorkspace {
   color: string | null;
   /** The R2 key of the project's icon, or null. */
   iconKey: string | null;
+  /**
+   * The avatar picked for the project, or null for the default mark (the
+   * owner's GitHub icon, or the letter tile). Absent from a server older
+   * than 0.5.0.
+   */
+  avatar?: ProjectAvatar | null;
   laneworkStyle: boolean;
   baseBranch: string | null;
   addedAt: IsoDate;
@@ -117,6 +124,11 @@ export interface SyncWorkspaceSlugTakenError {
 export interface SyncWorkspacePatchRequest {
   name?: string;
   color?: string | null;
+  /**
+   * Set the avatar; `null` clears it back to the default mark. The server
+   * refuses with 400 what `parseProjectAvatar` refuses.
+   */
+  avatar?: ProjectAvatar | null;
   baseBranch?: string | null;
   laneworkStyle?: boolean;
   autoRoute?: boolean;
@@ -128,6 +140,7 @@ export interface SyncWorkspacePatchResponse {
     slug: string;
     name: string;
     color: string | null;
+    avatar?: ProjectAvatar | null;
     baseBranch: string | null;
   };
 }

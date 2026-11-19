@@ -9,6 +9,7 @@
 
 export * from "./agent-notes";
 export * from "./auth";
+export * from "./avatar";
 export * from "./boards";
 export * from "./checkpoints";
 export * from "./common";
