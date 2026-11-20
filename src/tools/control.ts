@@ -27,6 +27,7 @@ export type ControlToolName =
   | "sessions_read"
   | "sessions_send"
   | "sessions_access"
+  | "sessions_answer"
   | "memory_read"
   | "memory_append"
   | "memory_write"
@@ -52,6 +53,7 @@ export type ControlToolAction =
   | "sessions.read"
   | "sessions.send"
   | "sessions.access"
+  | "sessions.answer"
   | "memory.read"
   | "memory.append"
   | "memory.write"
@@ -232,7 +234,7 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
       action: "sessions.read",
       role: "conductor",
       description:
-        "The last exchanges of one of your sessions, prompts and replies only, each cut to maxChars.",
+        "The last exchanges of one of your sessions, prompts and replies only, each cut to maxChars, and the permission requests it waits on (requestId, tool, what it asks): answer those with sessions_answer.",
       readOnly: true,
       properties: {
         sessionId: SESSION_ID,
@@ -284,6 +286,30 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
         },
       },
       required: ["sessionId", "userAccess"],
+    },
+    {
+      name: "sessions_answer",
+      action: "sessions.answer",
+      role: "conductor",
+      description:
+        "Answer a permission request one of your sessions waits on (its requestId from sessions_read). A session the user has no access to waits on you: allow only what its task needs, deny with a reason otherwise. Refused when the user has access and answers it themselves.",
+      readOnly: false,
+      properties: {
+        sessionId: SESSION_ID,
+        requestId: {
+          type: "string",
+          description: "The request's id, as sessions_read lists it",
+        },
+        allow: {
+          type: "boolean",
+          description: "true lets the tool run once; false denies it",
+        },
+        message: {
+          type: "string",
+          description: `Why it was denied, told to the session; at most ${L.PROMPT_MAX} characters`,
+        },
+      },
+      required: ["sessionId", "requestId", "allow"],
     },
     {
       name: "memory_read",

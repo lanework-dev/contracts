@@ -18,4 +18,13 @@ describe("a conductor's sessions and the user", () => {
     expect(access?.readOnly).toBe(false);
     expect(access?.required).toEqual(["sessionId", "userAccess"]);
   });
+
+  test("sessions_answer answers a permission request of a session", () => {
+    const answer = tool("sessions_answer");
+    expect(answer?.action).toBe("sessions.answer");
+    expect(answer?.role).toBe("conductor");
+    expect(answer?.readOnly).toBe(false);
+    expect(answer?.required).toEqual(["sessionId", "requestId", "allow"]);
+    expect(answer?.properties.message?.type).toBe("string");
+  });
 });
