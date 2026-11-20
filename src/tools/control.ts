@@ -26,6 +26,7 @@ export type ControlToolName =
   | "sessions_list"
   | "sessions_read"
   | "sessions_send"
+  | "sessions_access"
   | "memory_read"
   | "memory_append"
   | "memory_write"
@@ -50,6 +51,7 @@ export type ControlToolAction =
   | "sessions.list"
   | "sessions.read"
   | "sessions.send"
+  | "sessions.access"
   | "memory.read"
   | "memory.append"
   | "memory.write"
@@ -142,6 +144,12 @@ const NOTIFY: ToolParam = {
     "Default true: Lanework tells you once the session's turn ends, so you review it",
 };
 
+const USER_ACCESS: ToolParam = {
+  type: "boolean",
+  description:
+    "Let the user work in the session too: send to it, stop it, answer its permissions. Default false: it is yours, and the user sees it read-only",
+};
+
 const SESSION_ID: ToolParam = {
   type: "string",
   description: "A sessionId from sessions_list",
@@ -180,7 +188,7 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
       action: "sessions.start",
       role: "conductor",
       description:
-        "Start a separate session in this project's checkout and submit the prompt as its first turn. It runs on your permission mode, under the title, and is yours alone: the user reaches it through you. agent defaults to yours; model and effort to yours on your agent, else that agent's default (OpenCode's model is provider/model). Unless notifyOnComplete is false, Lanework tells you once its turn ends: review it then and report to the user. Returns as soon as it started, with its sessionId. At most 4 of your sessions may work at once.",
+        "Start a separate session in this project's checkout and submit the prompt as its first turn. It runs on your permission mode, under the title, and is yours: the user sees it read-only and reaches it through you, unless userAccess lets them work in it too. agent defaults to yours; model and effort to yours on your agent, else that agent's default (OpenCode's model is provider/model). Unless notifyOnComplete is false, Lanework tells you once its turn ends: review it then and report to the user. Returns as soon as it started, with its sessionId. At most 4 of your sessions may work at once.",
       readOnly: false,
       properties: {
         title: {
@@ -206,6 +214,7 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
           description: 'The board card it works on, e.g. "FE-98"',
         },
         notifyOnComplete: NOTIFY,
+        userAccess: USER_ACCESS,
       },
       required: ["title", "prompt"],
     },
@@ -258,6 +267,23 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
         notifyOnComplete: NOTIFY,
       },
       required: ["sessionId", "prompt"],
+    },
+    {
+      name: "sessions_access",
+      action: "sessions.access",
+      role: "conductor",
+      description:
+        "Let the user work in one of your sessions, or take that back. Without access the user sees it read-only and reaches it through you; with it they may send, stop and answer its permissions as in any chat.",
+      readOnly: false,
+      properties: {
+        sessionId: SESSION_ID,
+        userAccess: {
+          type: "boolean",
+          description:
+            "true lets the user work in it; false makes it read-only again",
+        },
+      },
+      required: ["sessionId", "userAccess"],
     },
     {
       name: "memory_read",
