@@ -1,6 +1,6 @@
 {
   "name": "@lanework/contracts",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "module",
   "description": "The contract between the Lanework desktop app, its checkpoint hook, the Lanework API and their MCP servers: HTTP request and response shapes, the board, kit and control tool contracts (types, JSON Schema builders and run-time output shapes).",
   "license": "MIT",
@@ -9,10 +9,16 @@
     "type": "git",
     "url": "git+https://github.com/lanework-dev/contracts.git"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "files": [
+    "dist",
     "src",
     "LICENSE",
     "README.md"
@@ -22,6 +28,8 @@
   },
   "//": "Types, JSON Schema builders and output shapes only, no runtime dependencies. The desktop app (open source) and the API and MCP (private) both build on it; neither half may be imported here.",
   "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target node --format esm && tsc -p tsconfig.build.json",
+    "prepack": "bun run build",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "check:size": "bun scripts/check-size.ts"
