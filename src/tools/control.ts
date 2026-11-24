@@ -1,7 +1,7 @@
 // The lanework-control tools (FE-155): one MCP tool per action of the
 // `lanework-control` CLI, so an agent can call the app's control server
 // without a shell. A conversation's own actions (`sessions.*`, `memory.*`,
-// `conductors.create`) are checked by `parseSessionRequest` in
+// `conductors.create`, `thread.read`) are checked by `parseSessionRequest` in
 // `apps/desktop/shared/conductor-sessions.ts`; a run's (`list`, `delegate`,
 // …) by `parseControlRequest` in `apps/desktop/shared/orchestration.ts`.
 // The input shapes here mirror those parsers; the parsers stay the judge.
@@ -33,6 +33,7 @@ export type ControlToolName =
   | "memory_write"
   | "conductors_create"
   | "models_list"
+  | "thread_read"
   | "run_list"
   | "run_delegate"
   | "run_get"
@@ -59,6 +60,7 @@ export type ControlToolAction =
   | "memory.write"
   | "conductors.create"
   | "models.list"
+  | "thread.read"
   | "list"
   | "delegate"
   | "get"
@@ -99,6 +101,8 @@ export const CONTROL_TOOL_LIMITS = {
   LEAD_NAME_MAX: 60,
   LEAD_INSTRUCTIONS_MAX: 20_000,
   LEAD_CONTEXT_FILES_MAX: 20,
+  THREAD_READ_LIMIT_MAX: 20,
+  THREAD_READ_TURN_CHARS: 4000,
 } as const;
 
 const L = CONTROL_TOOL_LIMITS;
@@ -366,6 +370,46 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
         query: {
           type: "string",
           description: "Only ids containing this text, e.g. sonnet or glm",
+        },
+      },
+    },
+    {
+      name: "thread_read",
+      action: "thread.read",
+      role: "any",
+      description:
+        "Read turns of your own conversation's thread: its earlier sessions (after a switch of agent) and the conversation it was handed off from. A handoff block names each turn [<session>:<index>] and lists the ones it left out: read one only when the request needs it. No arguments lists the sessions with their turn counts; ref reads one turn; session pages through one session (follow next).",
+      readOnly: true,
+      properties: {
+        ref: {
+          type: "string",
+          description: 'One turn, such as "1135a96a:42"',
+        },
+        textOffset: {
+          type: "integer",
+          minimum: 0,
+          description: `With ref: read on from its nextTextOffset (each turn comes in ${L.THREAD_READ_TURN_CHARS}-character parts)`,
+        },
+        session: {
+          type: "string",
+          description: 'A session\'s prefix, such as "1135a96a"',
+        },
+        after: {
+          type: "integer",
+          minimum: -1,
+          description:
+            "With session: the turns after this index; default from its start",
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: L.THREAD_READ_LIMIT_MAX,
+          description: "With session: turns returned; default 10",
+        },
+        includeTools: {
+          type: "boolean",
+          description:
+            "Tool calls' outputs too; by default name and summary only",
         },
       },
     },

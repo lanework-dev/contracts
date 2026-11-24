@@ -1,6 +1,6 @@
 {
   "name": "@lanework/contracts",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "type": "module",
   "description": "The contract between the Lanework desktop app, its checkpoint hook, the Lanework API and their MCP servers: HTTP request and response shapes, the board, kit and control tool contracts (types, JSON Schema builders and run-time output shapes).",
   "license": "MIT",

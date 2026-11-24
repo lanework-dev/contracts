@@ -27,4 +27,13 @@ describe("a conductor's sessions and the user", () => {
     expect(answer?.required).toEqual(["sessionId", "requestId", "allow"]);
     expect(answer?.properties.message?.type).toBe("string");
   });
+
+  test("thread_read reads back the caller's own thread, for any conversation", () => {
+    const read = tool("thread_read");
+    expect(read?.action).toBe("thread.read");
+    expect(read?.role).toBe("any");
+    expect(read?.readOnly).toBe(true);
+    expect(read?.required ?? []).toEqual([]);
+    expect(read?.properties.limit?.maximum).toBe(20);
+  });
 });
