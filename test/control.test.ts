@@ -58,11 +58,11 @@ describe("a conductor's sessions and the user", () => {
   });
 });
 
-describe("an automation run's pace (FE-172)", () => {
+describe("a routine run's pace (FE-172)", () => {
   test("schedule_next takes minutes from 5 to 1440 and an optional reason", () => {
     const next = tool("schedule_next");
     expect(next?.action).toBe("loop.next");
-    expect(next?.role).toBe("automation");
+    expect(next?.role).toBe("routine");
     expect(next?.readOnly).toBe(false);
     expect(next?.required).toEqual(["minutes"]);
     expect(next?.properties.minutes?.minimum).toBe(5);
@@ -73,21 +73,21 @@ describe("an automation run's pace (FE-172)", () => {
   test("schedule_stop ends the loop", () => {
     const stop = tool("schedule_stop");
     expect(stop?.action).toBe("loop.stop");
-    expect(stop?.role).toBe("automation");
+    expect(stop?.role).toBe("routine");
     expect(stop?.required ?? []).toEqual([]);
   });
 
-  test("only an automation run sees them", () => {
+  test("only a routine run sees them", () => {
     const names = (roles: Parameters<typeof controlToolsFor>[0]) =>
       controlToolsFor(roles).map((entry) => entry.name);
     expect(names({ conductor: true, lead: true })).not.toContain(
       "schedule_next",
     );
-    expect(names({ conductor: false, lead: false, automation: true })).toEqual(
+    expect(names({ conductor: false, lead: false, routine: true })).toEqual(
       expect.arrayContaining(["schedule_next", "schedule_stop"]),
     );
     expect(
-      names({ conductor: false, lead: false, automation: true }),
+      names({ conductor: false, lead: false, routine: true }),
     ).not.toContain("sessions_start");
   });
 });

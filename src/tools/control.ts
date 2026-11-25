@@ -18,10 +18,10 @@ import type { ToolContract, ToolParam } from "./schema";
  * - `conductor`: only a conductor's own conversation (sessions, memory).
  * - `lead`: only the lead of an orchestration run.
  * - `any`: any conversation the app started.
- * - `automation`: only an automation run (fuongz/lanework FE-172): the tools
- *   that set when its automation runs next.
+ * - `routine`: only a routine run (fuongz/lanework FE-172): the tools
+ *   that set when its routine runs next.
  */
-export type ControlToolRole = "conductor" | "lead" | "any" | "automation";
+export type ControlToolRole = "conductor" | "lead" | "any" | "routine";
 
 export type ControlToolName =
   | "sessions_start"
@@ -467,8 +467,8 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
     {
       name: "schedule_next",
       action: "loop.next",
-      role: "automation",
-      description: `When this automation runs next, in minutes from now (${L.LOOP_MINUTES_MIN} to ${L.LOOP_MINUTES_MAX}): sooner while there is work in flight, later when nothing is moving. Call it once, near the end of the run; the last call wins. Without a call the automation's own default applies.`,
+      role: "routine",
+      description: `When this routine runs next, in minutes from now (${L.LOOP_MINUTES_MIN} to ${L.LOOP_MINUTES_MAX}): sooner while there is work in flight, later when nothing is moving. Call it once, near the end of the run; the last call wins. Without a call the routine's own default applies.`,
       readOnly: false,
       properties: {
         minutes: {
@@ -487,9 +487,9 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
     {
       name: "schedule_stop",
       action: "loop.stop",
-      role: "automation",
+      role: "routine",
       description:
-        "End this automation's loop: no run is scheduled after this one, until the user turns it on again. Call it when the work it watches is done or can no longer move.",
+        "End this routine's loop: no run is scheduled after this one, until the user turns it on again. Call it when the work it watches is done or can no longer move.",
       readOnly: false,
       properties: {
         reason: {
@@ -685,15 +685,15 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
 export function controlToolsFor(roles: {
   conductor: boolean;
   lead: boolean;
-  /** An automation run (FE-172): optional, so older callers see none. */
-  automation?: boolean;
+  /** A routine run (FE-172): optional, so older callers see none. */
+  routine?: boolean;
 }): ControlToolContract[] {
   return CONTROL_TOOLS.filter(
     (tool) =>
       tool.role === "any" ||
       (tool.role === "conductor" && roles.conductor) ||
       (tool.role === "lead" && roles.lead) ||
-      (tool.role === "automation" && roles.automation === true),
+      (tool.role === "routine" && roles.routine === true),
   );
 }
 
