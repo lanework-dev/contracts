@@ -18,8 +18,10 @@ import type { ToolContract, ToolParam } from "./schema";
  * - `conductor`: only a conductor's own conversation (sessions, memory).
  * - `lead`: only the lead of an orchestration run.
  * - `any`: any conversation the app started.
+ * - `automation`: only an automation run (fuongz/lanework FE-172): the tools
+ *   that set when its automation runs next.
  */
-export type ControlToolRole = "conductor" | "lead" | "any";
+export type ControlToolRole = "conductor" | "lead" | "any" | "automation";
 
 export type ControlToolName =
   | "sessions_start"
@@ -36,6 +38,8 @@ export type ControlToolName =
   | "thread_read"
   | "conversations_list"
   | "conversation_message"
+  | "schedule_next"
+  | "schedule_stop"
   | "run_list"
   | "run_delegate"
   | "run_get"
@@ -65,6 +69,8 @@ export type ControlToolAction =
   | "thread.read"
   | "conversations.list"
   | "conversations.message"
+  | "loop.next"
+  | "loop.stop"
   | "list"
   | "delegate"
   | "get"
@@ -109,6 +115,8 @@ export const CONTROL_TOOL_LIMITS = {
   THREAD_READ_TURN_CHARS: 4000,
   SUMMARY_MAX: 120,
   MESSAGES_PER_HOUR: 20,
+  LOOP_MINUTES_MIN: 5,
+  LOOP_MINUTES_MAX: 1440,
 } as const;
 
 const L = CONTROL_TOOL_LIMITS;
@@ -457,6 +465,40 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
       required: ["to", "text"],
     },
     {
+      name: "schedule_next",
+      action: "loop.next",
+      role: "automation",
+      description: `When this automation runs next, in minutes from now (${L.LOOP_MINUTES_MIN} to ${L.LOOP_MINUTES_MAX}): sooner while there is work in flight, later when nothing is moving. Call it once, near the end of the run; the last call wins. Without a call the automation's own default applies.`,
+      readOnly: false,
+      properties: {
+        minutes: {
+          type: "integer",
+          minimum: L.LOOP_MINUTES_MIN,
+          maximum: L.LOOP_MINUTES_MAX,
+          description: `Minutes until the next run, ${L.LOOP_MINUTES_MIN} to ${L.LOOP_MINUTES_MAX}`,
+        },
+        reason: {
+          type: "string",
+          description: `Why that pace, at most ${L.SUMMARY_MAX} characters: shown in the run's history`,
+        },
+      },
+      required: ["minutes"],
+    },
+    {
+      name: "schedule_stop",
+      action: "loop.stop",
+      role: "automation",
+      description:
+        "End this automation's loop: no run is scheduled after this one, until the user turns it on again. Call it when the work it watches is done or can no longer move.",
+      readOnly: false,
+      properties: {
+        reason: {
+          type: "string",
+          description: `Why it stops, at most ${L.SUMMARY_MAX} characters: shown in the run's history`,
+        },
+      },
+    },
+    {
       name: "conductors_create",
       action: "conductors.create",
       role: "any",
@@ -643,12 +685,15 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
 export function controlToolsFor(roles: {
   conductor: boolean;
   lead: boolean;
+  /** An automation run (FE-172): optional, so older callers see none. */
+  automation?: boolean;
 }): ControlToolContract[] {
   return CONTROL_TOOLS.filter(
     (tool) =>
       tool.role === "any" ||
       (tool.role === "conductor" && roles.conductor) ||
-      (tool.role === "lead" && roles.lead),
+      (tool.role === "lead" && roles.lead) ||
+      (tool.role === "automation" && roles.automation === true),
   );
 }
 
