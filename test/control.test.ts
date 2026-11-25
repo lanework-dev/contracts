@@ -36,4 +36,24 @@ describe("a conductor's sessions and the user", () => {
     expect(read?.required ?? []).toEqual([]);
     expect(read?.properties.limit?.maximum).toBe(20);
   });
+
+  test("follow-ups take a short summary", () => {
+    for (const name of [
+      "sessions_start",
+      "sessions_send",
+      "run_steer",
+      "run_message",
+    ] as const)
+      expect(tool(name)?.properties.summary?.type).toBe("string");
+  });
+
+  test("conversations_list and conversation_message reach other conversations", () => {
+    const list = tool("conversations_list");
+    expect(list?.action).toBe("conversations.list");
+    expect(list?.readOnly).toBe(true);
+    const message = tool("conversation_message");
+    expect(message?.action).toBe("conversations.message");
+    expect(message?.role).toBe("any");
+    expect(message?.required).toEqual(["to", "text"]);
+  });
 });

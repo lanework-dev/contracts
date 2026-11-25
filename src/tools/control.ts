@@ -34,6 +34,8 @@ export type ControlToolName =
   | "conductors_create"
   | "models_list"
   | "thread_read"
+  | "conversations_list"
+  | "conversation_message"
   | "run_list"
   | "run_delegate"
   | "run_get"
@@ -61,6 +63,8 @@ export type ControlToolAction =
   | "conductors.create"
   | "models.list"
   | "thread.read"
+  | "conversations.list"
+  | "conversations.message"
   | "list"
   | "delegate"
   | "get"
@@ -103,9 +107,17 @@ export const CONTROL_TOOL_LIMITS = {
   LEAD_CONTEXT_FILES_MAX: 20,
   THREAD_READ_LIMIT_MAX: 20,
   THREAD_READ_TURN_CHARS: 4000,
+  SUMMARY_MAX: 120,
+  MESSAGES_PER_HOUR: 20,
 } as const;
 
 const L = CONTROL_TOOL_LIMITS;
+
+/** A follow-up's few words (BE-06): the title the user reads first. */
+const SUMMARY: ToolParam = {
+  type: "string",
+  description: `A few words on what is asked, at most ${L.SUMMARY_MAX} characters: the user reads it first, the text folded under it`,
+};
 
 /** The app's `EFFORTS`. */
 const EFFORTS = ["low", "medium", "high", "xhigh", "max"] as const;
@@ -221,6 +233,7 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
         },
         notifyOnComplete: NOTIFY,
         userAccess: USER_ACCESS,
+        summary: SUMMARY,
       },
       required: ["title", "prompt"],
     },
@@ -271,6 +284,7 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
           description: `The follow-up, at most ${L.PROMPT_MAX} characters`,
         },
         notifyOnComplete: NOTIFY,
+        summary: SUMMARY,
       },
       required: ["sessionId", "prompt"],
     },
@@ -414,6 +428,35 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
       },
     },
     {
+      name: "conversations_list",
+      action: "conversations.list",
+      role: "any",
+      description:
+        'Whom you may message with conversation_message: as a conductor, the other conductors of this project; as a session a conductor started, that conductor (to: "conductor"). Each with its agent and whether it is busy.',
+      readOnly: true,
+      properties: {},
+    },
+    {
+      name: "conversation_message",
+      action: "conversations.message",
+      role: "any",
+      description: `Message another conversation of this project: a conductor another conductor, or a session its own conductor (to: "conductor"). The first message between two conversations asks the user; at most ${L.MESSAGES_PER_HOUR} an hour to one. A busy one reads it once its turn ends. When both of you run on Claude it answers status "send-it" with an address: send the text yourself with SendMessage to it; Lanework checks it arrived and delivers it otherwise.`,
+      readOnly: false,
+      properties: {
+        to: {
+          type: "string",
+          description:
+            'A conductor\'s id from conversations_list, or "conductor" for your own',
+        },
+        text: {
+          type: "string",
+          description: `The message, at most ${L.PROMPT_MAX} characters`,
+        },
+        summary: SUMMARY,
+      },
+      required: ["to", "text"],
+    },
+    {
       name: "conductors_create",
       action: "conductors.create",
       role: "any",
@@ -541,7 +584,7 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
       description:
         "Redirect a worker that is still running, without discarding what it has done. Use it the moment one drifts; run_message only lands once it has stopped.",
       readOnly: false,
-      properties: { taskId: TASK_ID, text: WORKER_TEXT },
+      properties: { taskId: TASK_ID, text: WORKER_TEXT, summary: SUMMARY },
       required: ["taskId", "text"],
     },
     {
@@ -551,7 +594,7 @@ export const CONTROL_TOOLS: readonly ControlToolContract[] =
       description:
         "Give a stopped worker another turn in its own scope; it keeps its session, worktree and history.",
       readOnly: false,
-      properties: { taskId: TASK_ID, text: WORKER_TEXT },
+      properties: { taskId: TASK_ID, text: WORKER_TEXT, summary: SUMMARY },
       required: ["taskId", "text"],
     },
     {
